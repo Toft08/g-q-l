@@ -1,5 +1,5 @@
 import { getUserInfo, getResults, getSkills } from './query.js';
-import { radarChart } from './graph.js';
+import { xpGraph, radarChart } from './graph.js';
 
 const LOGIN_Path = 'https://01.gritlab.ax/api/auth/signin'
 const GraphQL_ENDPOINT = 'https://01.gritlab.ax/api/graphql-engine/v1/graphql'
@@ -90,6 +90,7 @@ async function loadProfile() {
 
     displayUserInfo();
     displaySkills();
+    displayXPByProject();
 }
 
 async function displayUserInfo() {
@@ -171,6 +172,35 @@ async function displaySkills() {
         document.getElementById('radar-chart').innerHTML = radarChartSVG;
     } catch (error) {
         console.error('Error displaying skills:', error);
+    }
+}
+
+async function displayXPByProject() {
+    try {
+        const data = await getResults(jwtToken);
+        console.log('XP Data:', data);
+
+        if (!data?.data?.transaction || data.data.transaction.length === 0) {
+            document.getElementById('xp-project-chart').innerHTML =
+                '<p>No XP data available</p>';
+            return;
+        }
+
+        // Extract XP data from transactions
+        const xpData = data.data.transaction.map(transaction => ({
+            amount: transaction.amount,
+            path: transaction.path,
+            createdAt: new Date(transaction.createdAt)
+        }));
+
+        console.log('XP Data for Graph:', xpData);
+        // Generate and render the XP chart
+        const xpChartSVG = xpGraph(xpData);
+        document.getElementById('xp-project-chart').innerHTML = xpChartSVG;
+    } catch (error) {
+        console.error('Error displaying XP by project:', error);
+        document.getElementById('xp-project-chart').innerHTML =
+            '<p>Error loading XP data</p>';
     }
 }
 

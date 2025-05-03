@@ -30,7 +30,6 @@ async function getResults(token) {
             transaction(
                 where: {type: {_eq: "xp"}}
                 order_by: {createdAt: desc}
-                limit: 100
                 ) {
                     amount
                     createdAt
