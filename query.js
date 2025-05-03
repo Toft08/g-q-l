@@ -1,39 +1,60 @@
-// GraphQL Queries
+export { getUserInfo, getResults, getSkills };
 
 // Normal Query: Get basic user info
 async function getUserInfo(token) {
     const query = `
-        {
+        query{
             user {
-            id
-            login
-            }
-        }
-    `;
-    return await graphqlRequest(query, token);
-}  
-  // Nested Query: Get result + user login
-async function getResults(token) {
-    const query = `
-        {
-            result {
                 id
-                user {
-                    login
+                firstName
+                lastName
+                campus
+                login
+                auditRatio
+                totalUp
+                totalDown
+                xps {
+                    amount
+                    path
                 }
+                attrs
             }
         }
     `;
     return await graphqlRequest(query, token);
 }
 
-// Query with arguments: Get a specific object by ID
-async function getObjectById(token, objectId) {
+async function getResults(token) {
     const query = `
-        {
-            object(where: { id: { _eq: ${objectId} }}) {
-                name
-                type
+        query {
+            transaction(
+                where: {type: {_eq: "xp"}}
+                order_by: {createdAt: desc}
+                limit: 100
+                ) {
+                    amount
+                    createdAt
+                    path
+            }
+        }
+    `;
+    return await graphqlRequest(query, token);
+}
+
+// Get skills from user.transactions
+async function getSkills(token) {
+    const query = `
+        query {
+            user {
+                skills: transactions(
+                    order_by: [{type: desc}, {amount: desc}]
+                    distinct_on: [type]
+                    where: {type: {_like: "skill%"}}
+                ) {
+                    type
+                    amount
+                    createdAt
+                }
             }
         }
     `;
@@ -42,13 +63,14 @@ async function getObjectById(token, objectId) {
 
 // Reusable fetcher
 async function graphqlRequest(query, token) {
-    const res = await fetch('https://((DOMAIN))/api/graphql-engine/v1/graphql', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-    body: JSON.stringify({ query })
-    });
+    const res = await fetch('https://01.gritlab.ax/api/graphql-engine/v1/graphql'
+        , {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query })
+        });
     return res.json();
 }

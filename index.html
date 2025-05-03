@@ -4,24 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GraphQL</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
     <div id="login-page">
         <h1>Login</h1>
-        <input type="text" id="username" placeholder="Username or Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="login-btn">Login</button>
+        <form id="login-form">
+            <input type="text" id="UserInput" placeholder="Username or Email">
+            <input type="password" id="password" placeholder="Password">
+            <button type="submit" id="login-btn">Login</button>
+        </form>
         <p id="error-msg"></p>
     </div>
 
     <!-- Profile Page -->
-    <div id="profile-page" style="display:none;">
-        <h2><span id="username">welcome to you profile</span>!</h2>
-        <button id="logout-btn">Logout</button>
-
+    <div id="profile-page">
+        <nav id="nav-bar">
+            <h2>Welcome to you profile <span id="user-name"></span>!</h2>
+            <button id="logout-btn">Logout</button>
+        </nav>
         <!-- 3 info sections -->
-        <section id="user-info"></section>
+    <section id="user-info"></section>
         <section id="xp-info"></section>
         <section id="audit-info"></section>
 
@@ -29,12 +33,10 @@
         <section id="graphs">
             <h2>Statistics</h2>
             <div id="graph1"></div>
-            <div id="graph2"></div>
+            <div id="radar-chart"></div>
         </section>
     </div>
 
-    <script src="query.js"></script>
-    <script src="graph.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
