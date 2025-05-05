@@ -183,7 +183,7 @@ function displayAuditInfo(userData) {
             return;
         }
         AuditInfoSection.innerHTML = `
-            <h3>Audit Ratio</h3>
+            <h3>Audit Summary</h3>
             <p><strong>Up:</strong> ${user.totalUp || 'N/A'}</p>
             <p><strong>Down:</strong> ${user.totalDown || 'N/A'}</p>
             <p><strong>Audit Ratio:</strong> ${user.auditRatio ? user.auditRatio.toFixed(1) : 'N/A'}</p>
@@ -287,7 +287,7 @@ function displayXP(xpData) {
         const highestXP = formattedXpData.reduce((max, t) => t.amount > max.amount ? t : max, formattedXpData[0]);
 
         xpInfoSection.innerHTML = `
-            <h3>XP Info</h3>
+            <h3>XP Summary</h3>
             <p><strong>Total amount:</strong> ${totalXP || 'N/A'}</p>
             <p><strong>Latest recived:</strong> ${latestXP.amount} (${latestXP.createdAt.toLocaleDateString()})</p>
             <p><strong>Highest recived:</strong> ${highestXP.amount} (${highestXP.path})</p>
