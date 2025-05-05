@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         jwtToken = storedToken;
         loadProfile();
     } else {
-        document.getElementById('login-page').style.display = 'block';
-        document.getElementById('profile-page').style.display = 'none';
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('profile-page').style.display = 'block';
     }
 
     const loginForm = document.getElementById('login-form');
@@ -74,12 +74,14 @@ function logout() {
  * Load the user profile and display it
  */
 async function loadProfile() {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('profile-page').style.display = 'block';
+    document.getElementById('login-page').style.display = 'block';
+    document.getElementById('profile-page').style.display = 'none';
 
-    const userInfo = await getUserInfo(jwtToken);
-    const xpResults = await getResults(jwtToken);
-    const skillsData = await getSkills(jwtToken);
+    const [userInfo, xpResults, skillsData] = await Promise.all([
+        getUserInfo(jwtToken),
+        getResults(jwtToken),
+        getSkills(jwtToken)
+    ]);
 
     // debugging
     console.log('User Info:', userInfo);
@@ -88,12 +90,12 @@ async function loadProfile() {
 
     document.getElementById('user-name').innerText = `${userInfo.data.user[0].login}`;
 
-    displayUserInfo();
-    displaySkills();
-    displayXPByProject();
+    displayUserInfo(userInfo);
+    displaySkills(skillsData);
+    displayXPByProject(xpResults);
 }
 
-async function displayUserInfo() {
+async function displayUserInfo(userInfo) {
     try {
         const data = await getUserInfo(jwtToken);
         const user = data?.data?.user?.[0];
@@ -113,7 +115,7 @@ async function displayUserInfo() {
     }
 }
 
-async function displaySkills() {
+async function displaySkills(skillsData) {
     try {
         const data = await getSkills(jwtToken);
         const skillValue = new Map();
@@ -175,7 +177,7 @@ async function displaySkills() {
     }
 }
 
-async function displayXPByProject() {
+async function displayXPByProject(xpResults) {
     try {
         const data = await getResults(jwtToken);
         console.log('XP Data:', data);

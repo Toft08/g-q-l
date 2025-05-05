@@ -4,9 +4,30 @@ body {
     padding: 20px;
 }
 
-#login-page, #profile-page {
+#profile-page {
     max-width: 600px;
     margin: auto;
+}
+#login-page {
+    display: flex;
+    margin: auto;
+    max-width: 60%;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    width: 300px;
+}
+#login-form h2 {
+    text-align: center;
 }
 
 input, button {
