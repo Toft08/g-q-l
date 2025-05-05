@@ -124,9 +124,9 @@ async function loadProfile() {
         }
 
         displayUserInfo(userInfo);
-        displayAuditRatio(userInfo);
+        displayAuditInfo(userInfo);
         displaySkills(skillsData);
-        displayXPByProject(xpResults);
+        displayXP(xpResults);
     } catch (error) {
         console.error('Error loading profile:', error);
         document.getElementById('error-msg').innerText = '<p>Error loading profile data</p>';
@@ -169,38 +169,12 @@ function displayUserInfo(userData) {
     }
 }
 
-function displayAuditRatio(userData) {
+function displayAuditInfo(userData) {
     try {
         const AuditInfoSection = document.getElementById("audit-info");
-        if (!AuditInfoSection) {
-            console.error("XP Audit Info section not found");
-            return;
-        }
-        const user = userData?.data?.user?.[0];
-        if (!user) {
-            AuditInfoSection.innerHTML = '<p>No user data available</p>';
-            return;
-        }
-        AuditInfoSection.innerHTML = `
-            <h3>XP Audit Ratio</h3>
-            <p><strong>Up:</strong> ${user.totalUp || 'N/A'}</p>
-            <p><strong>Down:</strong> ${user.totalDown || 'N/A'}</p>
-            <p><strong>Audit Ratio:</strong> ${user.auditRatio ? user.auditRatio.toFixed(1) : 'N/A'}</p>
-        `;
-    } catch (error) {
-        console.error('Error displaying Audit Ratio:', error);
-        const AuditInfoSection = document.getElementById("audit-info");
-        if (AuditInfoSection) {
-            AuditInfoSection.innerHTML = '<p>Error loading Audit Ratio</p>';
-        }
-    }
-}
 
-function displayXPRatio(userData) {
-    try {
-        const AuditInfoSection = document.getElementById("audit-info");
         if (!AuditInfoSection) {
-            console.error("XP Audit Info section not found");
+            console.error("Required info section not found");
             return;
         }
         const user = userData?.data?.user?.[0];
@@ -209,11 +183,12 @@ function displayXPRatio(userData) {
             return;
         }
         AuditInfoSection.innerHTML = `
-            <h3>XP Audit Ratio</h3>
+            <h3>Audit Ratio</h3>
             <p><strong>Up:</strong> ${user.totalUp || 'N/A'}</p>
             <p><strong>Down:</strong> ${user.totalDown || 'N/A'}</p>
             <p><strong>Audit Ratio:</strong> ${user.auditRatio ? user.auditRatio.toFixed(1) : 'N/A'}</p>
         `;
+
     } catch (error) {
         console.error('Error displaying Audit Ratio:', error);
         const AuditInfoSection = document.getElementById("audit-info");
@@ -283,11 +258,13 @@ function displaySkills(skillsData) {
  *  Displays XP data by project in a bar chart
  * @param {Object} xpData - The XP data object 
  */
-function displayXPByProject(xpData) {
+function displayXP(xpData) {
     try {
         const xpChartDiv = document.getElementById('xp-project-chart');
-        if (!xpChartDiv) {
-            console.error("XP chart container not found");
+        const xpInfoSection = document.getElementById("xp-info");
+
+        if (!xpChartDiv || !xpInfoSection) {
+            console.error("XP container not found");
             return;
         }
 
@@ -304,6 +281,17 @@ function displayXPByProject(xpData) {
         }));
 
         console.log('XP Data for Graph:', formattedXpData);
+
+        const totalXP = formattedXpData.reduce((sum, t) => sum + t.amount, 0);
+        const latestXP = formattedXpData[0];
+        const highestXP = formattedXpData.reduce((max, t) => t.amount > max.amount ? t : max, formattedXpData[0]);
+
+        xpInfoSection.innerHTML = `
+            <h3>XP Info</h3>
+            <p><strong>Total amount:</strong> ${totalXP || 'N/A'}</p>
+            <p><strong>Latest recived:</strong> ${latestXP.amount} (${latestXP.createdAt.toLocaleDateString()})</p>
+            <p><strong>Highest recived:</strong> ${highestXP.amount} (${highestXP.path})</p>
+            `;
 
         // Generate and render the XP chart
         const xpChartSVG = xpGraph(formattedXpData);
