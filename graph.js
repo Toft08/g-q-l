@@ -36,7 +36,8 @@ export function xpGraph(xpData) {
 
     const barWidth = chartWidth / sortedProjects.length * 0.7;
     const barSpacing = chartWidth / sortedProjects.length * 0.3;
-    const maxXP = Math.max(...sortedProjects.map(p => p[1]));
+    const rawMaxXP = Math.max(...sortedProjects.map(p => p[1]));
+    const maxXP = Math.ceil(rawMaxXP / 10000) * 10000;
 
     // Scale XP to chart height
     const yScale = value => chartHeight - (value / maxXP) * chartHeight;

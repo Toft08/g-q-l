@@ -8,28 +8,29 @@
     <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
-    <div id="login-page">
+    <div id="login-page" class="page">
         <form id="login-form">
-        <h1>Login</h1>
+            <h1>Login</h1>
             <input type="text" id="UserInput" placeholder="Username or Email">
             <input type="password" id="password" placeholder="Password">
             <button type="submit" id="login-btn">Login</button>
+            <p id="error-msg"></p>
         </form>
-        <p id="error-msg"></p>
     </div>
 
     <!-- Profile Page -->
-    <div id="profile-page">
+    <div id="profile-page" class="page">
         <nav id="nav-bar">
-            <h2>Welcome to you profile <span id="user-name"></span>!</h2>
+            <h2>Welcome to your profile <span id="user-name"></span>!</h2>
             <button id="logout-btn">Logout</button>
         </nav>
-        <!-- 3 info sections -->
-    <section id="user-info"></section>
-        <section id="xp-info"></section>
+        
+        <!-- Profile content -->
+        <section id="user-info"></section>
         <section id="audit-info"></section>
+        
 
-        <!-- stats graphs -->
+        <!-- Stats graphs -->
         <section id="graphs">
             <h2>Skills</h2>
             <div id="radar-chart"></div>
