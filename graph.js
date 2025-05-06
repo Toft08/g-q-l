@@ -4,20 +4,9 @@ export function xpGraph(xpData) {
         return '<svg width="800" height="400"><text x="400" y="200" text-anchor="middle" fill="#000">No XP data available</text></svg>';
     }
 
-    // Filter XP data by project path (ignores checkpoint & piscine projects)
-    const filteredXP = xpData.filter(xp => {
-        const path = xp.path;
-        return (
-            path.startsWith('/gritlab/school-curriculum') &&
-            !path.includes('/checkpoint-') &&
-            !path.includes('/piscine-')
-        );
-    });
-
-    console.log('Filtered XP Data:', filteredXP);
     // Group XP by project name
     const projectXP = new Map();
-    filteredXP.forEach(item => {
+    xpData.forEach(item => {
         const segments = item.path.split('/');
         const projectName = segments[3]; // Customize this as needed
         projectXP.set(projectName, (projectXP.get(projectName) || 0) + item.amount);
@@ -52,7 +41,6 @@ export function xpGraph(xpData) {
         .title { font-size: 16px; font-weight: bold; text-anchor: middle; }
     </style>
     <g transform="translate(${margin.left}, ${margin.top})">
-        <text class="title" x="${chartWidth / 2}" y="-5">XP Earned by Project</text>
         <line class="axis" x1="0" y1="0" x2="0" y2="${chartHeight}" />
     `;
 

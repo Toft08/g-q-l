@@ -2,9 +2,7 @@ import { getUserInfo, getResults, getSkills } from './query.js';
 import { xpGraph, radarChart } from './graph.js';
 
 const LOGIN_Path = 'https://01.gritlab.ax/api/auth/signin'
-const GraphQL_ENDPOINT = 'https://01.gritlab.ax/api/graphql-engine/v1/graphql'
 let jwtToken = '';
-
 
 document.addEventListener('DOMContentLoaded', () => {
     // Set initiall display for pages
@@ -57,7 +55,10 @@ function showPage(pageId) {
         console.error(`Cannot show page: Element with ID '${pageId}' not found`);
     }
 }
-
+/**
+ * Login function
+ * Fetches the JWT token from the server and stores it in localStorage
+ */
 async function login() {
     const userinput = document.getElementById('UserInput').value;
     const password = document.getElementById('password').value;
@@ -114,11 +115,6 @@ async function loadProfile() {
             getSkills(jwtToken)
         ]);
 
-        // debugging
-        console.log('User Info:', userInfo);
-        console.log('XP Results:', xpResults);
-        console.log('Skills Data:', skillsData);
-
         if (userInfo?.data?.user?.[0]?.login) {
             document.getElementById('user-name').innerText = `${userInfo.data.user[0].login}`;
         }
@@ -169,6 +165,10 @@ function displayUserInfo(userData) {
     }
 }
 
+/**
+ *  Displays the audit information in the profile page
+ * @param {Object} userData 
+ */
 function displayAuditInfo(userData) {
     try {
         const AuditInfoSection = document.getElementById("audit-info");
@@ -224,8 +224,6 @@ function displaySkills(skillsData) {
             });
         }
 
-        console.log('Processed Skill Map:', skillValue);
-
         // Format the skills data for radar chart
         const skills = Array.from(skillValue.entries()).map(([name, value]) => {
             const cleanName = name.replace('skill_', '');
@@ -236,8 +234,6 @@ function displaySkills(skillsData) {
                 value: scaledValue
             };
         });
-
-        console.log('Processed skills for radar chart:', skills);
 
         if (skills.length > 0) {
             const radarChartSVG = radarChart(skills);
@@ -255,7 +251,7 @@ function displaySkills(skillsData) {
 }
 
 /**
- *  Displays XP data by project in a bar chart
+ *  Displays XP data in profile pgae and by top ten project in a bar chart
  * @param {Object} xpData - The XP data object 
  */
 function displayXP(xpData) {
@@ -270,6 +266,7 @@ function displayXP(xpData) {
 
         if (!xpData?.data?.transaction || xpData.data.transaction.length === 0) {
             xpChartDiv.innerHTML = '<p>No XP data available</p>';
+            xpInfoSection.innerHTML = '<p>No XP data available</p>';
             return;
         }
 
@@ -280,27 +277,41 @@ function displayXP(xpData) {
             createdAt: new Date(transaction.createdAt)
         }));
 
-        console.log('XP Data for Graph:', formattedXpData);
+        // Filter XP data for school curriculum only (excluding piscine projects)
+        const filteredXpData = formattedXpData.filter(xp =>
+            (xp.path.startsWith('/gritlab/school-curriculum') && !xp.path.includes('/gritlab/school-curriculum/piscine-')) ||
+            xp.path.endsWith('piscine-js')
+        );
 
-        const totalXP = formattedXpData.reduce((sum, t) => sum + t.amount, 0);
-        const latestXP = formattedXpData[0];
-        const highestXP = formattedXpData.reduce((max, t) => t.amount > max.amount ? t : max, formattedXpData[0]);
+        const totalXP = filteredXpData.reduce((sum, t) => sum + t.amount, 0);
+
+        let latestXP = { amount: 0, createdAt: new Date() };
+        let highestXP = { amount: 0, path: 'N/A' };
+
+        if (filteredXpData.length > 0) {
+            latestXP = filteredXpData[0];
+            highestXP = filteredXpData.reduce((max, t) => t.amount > max.amount ? t : max, filteredXpData[0]);
+        }
 
         xpInfoSection.innerHTML = `
             <h3>XP Summary</h3>
             <p><strong>Total amount:</strong> ${totalXP || 'N/A'}</p>
             <p><strong>Latest recived:</strong> ${latestXP.amount} (${latestXP.createdAt.toLocaleDateString()})</p>
-            <p><strong>Highest recived:</strong> ${highestXP.amount} (${highestXP.path})</p>
+            <p><strong>Highest recived:</strong> ${highestXP.amount} (${highestXP.createdAt.toLocaleDateString()})</p>
             `;
 
         // Generate and render the XP chart
-        const xpChartSVG = xpGraph(formattedXpData);
+        const xpChartSVG = xpGraph(filteredXpData);
         xpChartDiv.innerHTML = xpChartSVG;
     } catch (error) {
         console.error('Error displaying XP by project:', error);
         const xpChartDiv = document.getElementById('xp-project-chart');
         if (xpChartDiv) {
             xpChartDiv.innerHTML = '<p>Error loading XP data</p>';
+        }
+        const xpInfoSection = document.getElementById("xp-info");
+        if (xpInfoSection) {
+            xpInfoSection.innerHTML = '<p>Error loading XP data</p>';
         }
     }
 }
