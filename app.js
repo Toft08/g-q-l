@@ -13,7 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const storedToken = localStorage.getItem('JWT');
     if (storedToken) {
         jwtToken = storedToken;
-        loadProfile();
+
+        if (isTokenValid(jwtToken)) {
+            loadProfile();
+        } else {
+            localStorage.removeItem('JWT');
+            jwtToken = '';
+            document.getElementById('error-msg').innerText = "Session expired. Please log in again.";
+            showPage('login-page');
+        }
     } else {
         showPage('login-page');
     }
@@ -84,6 +92,11 @@ async function login() {
 
         const JWT = await response.text();
         jwtToken = JWT.replace(/"/g, '');
+
+        if (!isTokenValid(jwtToken)) {
+            document.getElementById('error-msg').innerText = "Recieved invalid token. Please try again.";
+            return;
+        }
         localStorage.setItem('JWT', jwtToken);
         loadProfile();
     } catch (error) {
@@ -102,10 +115,39 @@ function logout() {
     localStorage.removeItem('JWT');
     showPage('login-page');
 }
+
+/**
+ * Check if the JWT token is valid and not expired
+ * @returns {boolean} True if valid, false otherwise
+ */
+function isTokenValid(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (payload.exp < currentTime) {
+            console.error('Token expired');
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return false;
+    }
+}
+
 /**
  * Load the user profile and display it
  */
 async function loadProfile() {
+    if (!isTokenValid(jwtToken)) {
+        document.getElementById('error-msg').innerText = "Session expired. Please log in again.";
+        localStorage.removeItem('JWT');
+        jwtToken = '';
+        showPage('login-page');
+        return;
+    }
+
     showPage('profile-page');
 
     try {
@@ -126,6 +168,14 @@ async function loadProfile() {
     } catch (error) {
         console.error('Error loading profile:', error);
         document.getElementById('error-msg').innerText = '<p>Error loading profile data</p>';
+
+        // Check if the error is due to an expired token
+        if (error.message.includes('401')) {
+            document.getElementById('error-msg').innerText = "Session expired. Please log in again.";
+            localStorage.removeItem('JWT');
+            jwtToken = '';
+            showPage('login-page');
+        }
     }
 }
 
